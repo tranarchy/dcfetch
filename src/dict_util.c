@@ -51,7 +51,7 @@ void remove_dict_entry(const char *key, struct dicts *d) {
 
 	if (move_back) {
 		d->count--;
-		d->dicts = reallocarray(d->dicts, d->count, sizeof(struct dict));	
+		d->dicts = realloc(d->dicts, d->count * sizeof(struct dict));	
 	}
 }
 
@@ -67,7 +67,7 @@ void add_dict_entry(struct dicts *d, char *key, char *value, ...) {
 	strlcpy(result.key, key, 256);
 	strlcpy(result.value, value_buffer, 256);
 
-	d->dicts = reallocarray(d->dicts, d->count + 1, sizeof(struct dict));
+	d->dicts = realloc(d->dicts, (d->count + 1) * sizeof(struct dict));
 	d->dicts[d->count] = result;	
 	d->count++;
 }
