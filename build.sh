@@ -1,7 +1,7 @@
 #!/bin/sh
 
 SRC="src/main.c src/dict_util.c src/os.c src/rpc.c"
-STDFLAGS="-Iinclude -O2 -Wall"
+STDFLAGS="-Iinclude -Wall"
 OUTPUT="dcfetch"
 
 CC="cc"
