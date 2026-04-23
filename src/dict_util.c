@@ -59,9 +59,9 @@ void add_dict_entry(struct dicts *d, char *key, char *value, ...) {
 	va_list args;
 	char value_buffer[256];
 
-    	va_start(args, value);
-    	vsprintf(value_buffer, value, args);
-    	va_end(args);
+    va_start(args, value);
+    vsprintf(value_buffer, value, args);
+    va_end(args);
 	
 	struct dict result;
 	strlcpy(result.key, key, 256);
@@ -75,9 +75,10 @@ void add_dict_entry(struct dicts *d, char *key, char *value, ...) {
 bool parse_file(const char *path, struct dicts *d) {
 	FILE *fp;
 	ssize_t read;
+	char key[256], value[256];
 
 	char *line = NULL;
-    	size_t len = 0;
+	size_t len = 0;
 
 	if (access(path, F_OK) == -1)
 		return false;
@@ -88,41 +89,40 @@ bool parse_file(const char *path, struct dicts *d) {
 		if (read <= 1)
 			continue;
 
-		char *contains_quotation_mark = strstr(line, "\"");
+		char *quotation_mark_sub = strstr(line, "\"");
+		char *equals_sub = strstr(line, "=");
 
-		line[read - (!contains_quotation_mark ? 1 : 2)] = '\0';
+		int len_for_key = -1;
 
-		int separator_index = -1;
+		if (quotation_mark_sub != NULL)
+			len_for_key = quotation_mark_sub - line;
+		else if (equals_sub != NULL)
+			len_for_key = equals_sub - line + 1;
 
-		for (int i = 0; i < read; i++) {
-			if (i + 1 < read && line[i] == '=') {
-				separator_index = i + 1;
-
-				break;
-			}
-		}
-
-		if (separator_index == -1)
+		if (len_for_key == -1)
 			continue;
 
-		char key[256];
-		strlcpy(key, line, separator_index);
+		strlcpy(key, line, len_for_key);
 
-		int value_len = read - separator_index - (!contains_quotation_mark ? 0 : 2);
+		char *line_with_key_offset = line + len_for_key;
+		int line_with_key_offset_len = strlen(line_with_key_offset);
 
-		char value[256];
-		line += separator_index + (!contains_quotation_mark ? 0 : 1);
-		strlcpy(value, line, value_len);
-	
+		if (quotation_mark_sub != NULL) {
+			line_with_key_offset++;
+			line_with_key_offset_len -= 2;
+		} 
+
+		strlcpy(value, line_with_key_offset, line_with_key_offset_len);
+
 		add_dict_entry(d, key, value);
 	}
+
+	fclose(fp);
 
 	if (d->count == 0)
 		return false;
 
 	return true;
-	
-	fclose(fp);
 }
 
 struct dicts get_config(void) {
