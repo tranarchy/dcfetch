@@ -9,6 +9,11 @@
 #include <sys/socket.h>
 
 static const char *env_vars[] = { "XDG_RUNTIME_DIR", "TMPDIR", "TMP", "TEMP" };
+static const char *subpaths[] = {
+    "",
+    "/app/com.discordapp.Discord",
+    "/.flatpak/com.discordapp.Discord/xdg-run"
+};
 
 static const char *APP_ID = "1494653358454214726";
 
@@ -21,18 +26,19 @@ static void get_ipc_path(char **ipc_path) {
 		if (path == NULL)
                     continue;
 
-                for (int j = 0; j < 10; j++) {
-			char ipc_path_buff[1024];
+              
+    for (size_t s = 0; s < sizeof(subpaths) / sizeof(subpaths[0]); s++) {
+                    for (int j = 0; j < 10; j++) {
+                        char ipc_path_buff[1024];
+                        snprintf(ipc_path_buff, sizeof(ipc_path_buff), "%s%s/discord-ipc-%d", path, subpaths[s], j);
 
-		  	snprintf(ipc_path_buff, sizeof(ipc_path_buff), "%s/discord-ipc-%d", path, j);
-			
-			if (access(ipc_path_buff, F_OK) == -1)
-				continue;
-			
-			*ipc_path = strdup(ipc_path_buff);
+                        if (access(ipc_path_buff, F_OK) == -1)
+                            continue;
 
-			return;
-		}
+                        *ipc_path = strdup(ipc_path_buff);
+                        return;
+                    }
+                }
 	}
 }
 

@@ -100,7 +100,7 @@ static void node_event_info(void *data, const struct pw_node_info *info) {
 	int substring_index = -1;
 
 	for (int i = 0; i < sizeof(substrings_to_remove) / sizeof(substrings_to_remove[0]); i++) {
-		char *strstr_ret = strstr(media_name, substrings_to_remove[i]);
+		const char *strstr_ret = strstr(media_name, substrings_to_remove[i]);
 		if (strstr_ret != NULL) {
 			substring_index = strstr_ret - media_name;
 		}
